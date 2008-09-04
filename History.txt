@@ -1,3 +1,7 @@
+=== 1.0.8.1 / 2008-09-7
+
+* Suppress the warning on Rails-2.1.1.
+
 === Master / 2008-07-31
 
 * Make it clear that generated views are meant to be used when bonus features are enabled. [Trevor Turk, ncr]
