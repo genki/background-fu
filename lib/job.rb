@@ -25,6 +25,19 @@ class Job < ActiveRecord::Base
     
     job
   end
+  
+  def self.enqueue_with_delay!(delay_in_minutes, worker_class, worker_method, *args)
+    job = create!(
+      :start_at      => Time.now + (delay_in_minutes * 60),
+      :worker_class  => worker_class.to_s,
+      :worker_method => worker_method.to_s,
+      :args          => args
+    )
+    
+    logger.info("BackgroundFu: Job enqueued with #{delay_in_minutes} minute delay. Job(id: #{job.id}, worker: #{worker_class}, method: #{worker_method}, argc: #{args.size}).")
+    
+    job
+  end
 
   # Invoked by a background daemon.
   def get_done!
@@ -50,7 +63,7 @@ class Job < ActiveRecord::Base
   end
   
   def initialize_worker
-    update_attributes!(:started_at => Time.now.utc, :state => "running")
+    update_attributes!(:started_at => Time.now, :state => "running")
     @worker = worker_class.constantize.new
     logger.info("BackgroundFu: Job initialized. Job(id: #{id}).")
   end
@@ -107,7 +120,7 @@ class Job < ActiveRecord::Base
   def setup_start_at
     return unless start_at.blank?
     
-    self.start_at = Time.now.utc
+    self.start_at = Time.now
   end
 
 end  
